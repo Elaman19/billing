@@ -15,12 +15,6 @@ export class User {
 
   @Prop({ required: true, trim: true })
   password: string;
-
-  @Prop()
-  cardId?: string;
-
-  @Prop()
-  rekv1: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

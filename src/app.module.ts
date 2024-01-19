@@ -4,10 +4,12 @@ import { UserModule } from './user/user.module';
 import { BillingModule } from './billing/billing.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/nest'), 
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGODB_URL), 
     UserModule,
     BillingModule, 
     InvoiceModule, 

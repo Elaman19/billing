@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Replace with the path to your Dockerfile if it's in a different location
+    ports:
+      - "3000:3000"  # Expose the Nest.js application on port 3000
+    depends_on:
+      - mongo  # Depend on the MongoDB service
+
+  mongo:
+    image: "mongo:6.2.1"
+    ports:
+      - "27017:27017"  # Expose the MongoDB port
+    volumes:
+      - mongo-data:/data/db  # Mount a volume for MongoDB data persistence
+
+volumes:
+  mongo-data:
