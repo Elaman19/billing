@@ -1,20 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Transaction } from 'src/transaction/model/transaction.model';
-import { Account } from 'src/billing/model/account.model';
+import { Account } from 'src/account/model/account.model';
 import { User } from 'src/user/models/user.model';
 import { Currency } from 'src/constants';
 
 @Injectable()
-export class BillingService {
+export class AccountService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(Account.name) private readonly accountModel: Model<Account>,
     @InjectModel(Transaction.name) private readonly transactionModel: Model<Transaction>,
   ) {}
 
-  async createAccount(userId: string, currency: Currency = Currency.RUR): Promise<Account> {
+  async createAccount(
+    userId: string, 
+    currency: Currency = Currency.RUR
+  ): Promise<Account> {
     const account = new this.accountModel({ userId, currency });
     return await account.save();
   }
@@ -54,11 +57,52 @@ export class BillingService {
 
   }
 
-  async chargeAccount(userId: string, amount: number, description: string): Promise<Transaction> {
-    const account = await this.accountModel.findOne({ userId, balance: { $gte: amount } });
-    if (!account) {
-      throw new NotFoundException('Insufficient funds or account not found');
-    }
+  // Сценарий валидации счета B2C - пополнение мгновенно через эквайринг.
+  async validateAccount(accountId: string): Promise<string>{
+    const account = await this.accountModel.findById(accountId)
+    if (!account)
+      throw new BadRequestException('Account not found')
+
+    const user = await this.userModel.findById(account.userId)
+    if (!user)
+      throw new BadRequestException('User not found')
+
+    return user.username
+  }
+  // Сценарий пополнения счета B2C - пополнение мгновенно через эквайринг.
+  async repleinishAccount(accountId: string, amount: number){
+    const account = await this.accountModel.findById(accountId)
+    if (!account)
+      throw new BadRequestException('Account not found')
+
+    account.balance += amount;
+
+    const transaction = new this.transactionModel({
+      accountId: account._id,
+      amount: amount, 
+      type: 'credit',
+      status: 'completed'
+    });
+
+    // Update account balance
+    account.balance += amount;
+    await Promise.all([transaction.save(), account.save()]);
+
+    return transaction
+  }
+
+  // Сценарий списывания со счета
+  async chargeAccount(
+    userId: string, 
+    amount: number, 
+    description: string
+  ): Promise<Transaction> {
+    const account = await this.accountModel.findOne({ userId });
+    if (!account) 
+      throw new NotFoundException('Account not found');
+    
+    if (account.balance < amount)
+      throw new NotFoundException('Unsufficient fund in balance')
 
     const transaction = new this.transactionModel({
       accountId: account._id,
@@ -71,33 +115,6 @@ export class BillingService {
     // Update account balance
     account.balance -= amount;
     await Promise.all([transaction.save(), account.save()]);
-
-    return transaction;
-  }
-
-  async processTransaction(accountId: string, amount: number, type: string): Promise<Transaction> {
-    const account = await this.accountModel.findById(accountId);
-    if (!account) {
-      throw new NotFoundException('Account not found');
-    }
-
-    let status = 'completed';
-    if (type === 'debit' && account.balance < amount) {
-      status = 'pending';
-    }
-
-    const transaction = new this.transactionModel({ accountId, amount, type, status });
-    await transaction.save();
-
-    if (status === 'completed') {
-      if (type === 'debit') {
-        account.balance -= amount;
-      } 
-      if (type === 'credit') {
-        account.balance += amount;
-      }
-      await account.save();
-    }
 
     return transaction;
   }

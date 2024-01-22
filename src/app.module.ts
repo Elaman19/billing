@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
-import { BillingModule } from './billing/billing.module';
+import { BillingModule } from './account/account.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { ConfigModule } from '@nestjs/config';
