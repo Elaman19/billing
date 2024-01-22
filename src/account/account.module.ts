@@ -13,4 +13,4 @@ import { Transaction, TransactionSchema } from 'src/transaction/model/transactio
   ],
   providers: [AccountService]
 })
-export class BillingModule {}
+export class AccountModule {}

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
-import { BillingModule } from './account/account.module';
+import { AccountModule } from './account/account.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { ConfigModule } from '@nestjs/config';
@@ -11,7 +11,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URL), 
     UserModule,
-    BillingModule, 
+    AccountModule, 
     InvoiceModule, 
     TransactionModule
   ]

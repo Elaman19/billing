@@ -1,19 +1,19 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { BillingModule } from 'src/account/account.module';
+import { AccountModule } from 'src/account/account.module';
 import { AccountService } from 'src/account/account.service';
 
 describe('Billing', () => {
   let app: INestApplication;
-  let billingService = { findAll: () => ['test'] };
+  let accountService = { findAll: () => ['test'] };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [BillingModule],
+      imports: [AccountModule],
     })
       .overrideProvider(AccountService)
-      .useValue(billingService)
+      .useValue(accountService)
       .compile();
 
     app = moduleRef.createNestApplication();
@@ -25,7 +25,7 @@ describe('Billing', () => {
       .get('/users')
       .expect(200)
       .expect({
-        data: billingService.findAll(),
+        data: accountService.findAll(),
       });
   });
 
