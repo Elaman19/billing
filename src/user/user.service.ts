@@ -1,5 +1,5 @@
 import { HttpCode, HttpStatus, Injectable } from '@nestjs/common';
-import { User, UserDocument } from './models/user.model';
+import { User, UserDocument } from './model/user.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,7 +17,7 @@ export class UserService {
     const newUser = new this.userModel(dto);
     await newUser.save()
     // После регистрации пользователя создавается рублевый счет
-    this.accountService.createAccount(newUser._id.toString())
+    this.accountService.create(newUser._id.toString())
     return HttpStatus.CREATED
   }
 }

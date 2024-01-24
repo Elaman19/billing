@@ -1,19 +1,19 @@
 import { Test } from '@nestjs/testing';
-import { BillingController } from './billing.controller';
-import { BillingService } from './account.service';
+import { AccountController } from './account.controller';
+import { AccountService } from './account.service';
 
-describe('BillingController', () => {
-  let billingController: BillingController;
-  let billingService: BillingService;
+describe('AccountController', () => {
+  let billingController: AccountController;
+  let billingService: AccountService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-        controllers: [BillingController],
-        providers: [BillingService],
+        controllers: [AccountController],
+        providers: [AccountService],
       }).compile();
 
-    billingService = moduleRef.get<BillingService>(BillingService);
-    billingController = moduleRef.get<BillingController>(BillingController);
+    billingService = moduleRef.get<AccountService>(AccountService);
+    billingController = moduleRef.get<AccountController>(AccountController);
   });
 
   describe('findAll', () => {
