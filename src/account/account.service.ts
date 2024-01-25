@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Transaction } from 'src/transaction/model/transaction.model';
-import { Account } from 'src/account/model/account.model';
-import { Currency } from 'src/constants';
+import { Account, AccountDocument } from 'src/account/model/account.model';
 import { User } from 'src/user/model/user.model';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { RepleinishAccountDto } from './dto/repleinish-account.dto';
+import { WithdrawAccountDto } from './dto/withdraw-account.dto';
 
 @Injectable()
 export class AccountService {
@@ -19,11 +21,12 @@ export class AccountService {
     return await this.accountModel.find({})
   }
 
-  async create(
-    userId: string, 
-    currency: Currency = Currency.RUR
-  ): Promise<Account> {
-    const account = new this.accountModel({ userId, currency });
+  async create(dto: CreateAccountDto): Promise<AccountDocument> {
+    if (!dto.userId){
+      const account = new this.accountModel({userId: 'asdf'});
+      return await account.save();
+    }
+    const account = new this.accountModel(dto);
     return await account.save();
   }
 
@@ -43,7 +46,7 @@ export class AccountService {
   }
 
   // Сценарий валидации счета B2C - пополнение мгновенно через эквайринг.
-  async validate(accountId: string): Promise<string>{
+  async validate(accountId: Types.ObjectId): Promise<string>{
     const account = await this.accountModel.findById(accountId)
     if (!account)
       throw new BadRequestException('Account not found')
@@ -55,56 +58,52 @@ export class AccountService {
     return user.username
   }
   // Сценарий пополнения счета B2C - пополнение мгновенно через эквайринг.
-  async repleinish(accountId: string, amount: number){
-    const account = await this.accountModel.findById(accountId)
+  async repleinish(dto: RepleinishAccountDto){
+    const account = await this.accountModel.findById(dto.accountId)
     if (!account)
       throw new BadRequestException('Account not found')
 
-    account.balance += amount;
+    account.balance += dto.amount;
 
     const transaction = new this.transactionModel({
       accountId: account._id,
-      amount: amount, 
+      amount: dto.amount, 
       type: 'credit',
       status: 'completed'
     });
 
     // Update account balance
-    account.balance += amount;
+    account.balance += dto.amount;
     await Promise.all([transaction.save(), account.save()]);
 
     return transaction
   }
 
   // Сценарий списывания со счета
-  async withdraw(
-    userId: string, 
-    amount: number, 
-    description: string
-  ): Promise<Transaction> {
-    const account = await this.accountModel.findOne({ userId });
+  async withdraw(dto: WithdrawAccountDto): Promise<Transaction> {
+    const account = await this.accountModel.findById(dto.accountId);
     if (!account) 
       throw new NotFoundException('Account not found');
     
-    if (account.balance < amount)
+    if (account.balance < dto.amount)
       throw new NotFoundException('Unsufficient fund in balance')
 
     const transaction = new this.transactionModel({
       accountId: account._id,
-      amount: -amount, // Negative amount denotes a debit transaction
+      amount: -dto.amount, // Negative amount denotes a debit transaction
       type: 'debit',
       status: 'completed',
-      description,
+      description: '',
     });
 
     // Update account balance
-    account.balance -= amount;
+    account.balance -= dto.amount;
     await Promise.all([transaction.save(), account.save()]);
 
     return transaction;
   }
 
-  async getBalance(accountId: string): Promise<number> {
+  async getBalance(accountId: Types.ObjectId): Promise<number> {
     const account = await this.accountModel.findById(accountId);
     if (!account) {
       throw new NotFoundException('Account not found');

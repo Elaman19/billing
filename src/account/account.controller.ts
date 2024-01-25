@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { RepleinishAccountDto } from './dto/repleinish-account.dto';
 import { WithdrawAccountDto } from './dto/withdraw-account.dto';
+import { Types } from 'mongoose';
 
 @Controller('account')
 @ApiTags('account')
@@ -19,7 +20,7 @@ export class AccountController {
   @Post('create')
   @ApiBody({ type: CreateAccountDto })
   async createAccount(@Body() dto: CreateAccountDto){
-    return await this.accountService.create(dto.userId, dto?.currency)
+    return await this.accountService.create(dto)
   }
 
   @Patch('update')
@@ -28,23 +29,25 @@ export class AccountController {
     return await this.accountService.update(dto)
   }
 
-  @Get('validate')
-  async validate(@Param(':accountId') accountId: string){
+  @Get('validate/:accountId')
+  @ApiParam({ name: 'accountId', type: String})
+  async validate(@Param('accountId') accountId: Types.ObjectId){
     return await this.accountService.validate(accountId)
   }
 
   @Post('repleinish')
   async repleinish(@Body() dto: RepleinishAccountDto){
-    return await this.accountService.repleinish(dto.accountId, dto.amount)
+    return await this.accountService.repleinish(dto)
   }
 
   @Post('withdraw')
   async withdraw(@Body() dto: WithdrawAccountDto){
-    return await this.accountService.withdraw(dto.accountId, dto.amount, '')
+    return await this.accountService.withdraw(dto)
   }
 
-  @Get('balance')
-  async getBalance(@Param(':accountId') accountId: string){
+  @Get('balance/:accountId')
+  @ApiParam({ name: 'accountId', type: String})
+  async getBalance(@Param('accountId') accountId: Types.ObjectId){
     return await this.accountService.getBalance(accountId)
   }
 }
