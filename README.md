@@ -1,22 +1,5 @@
-
-## Installation
-
-```bash
-$ npm install
-```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-## swagger documentation
-
-localhost:3000/api
+Комманды
+1. install mongodb locally
+2. npm install
+3. npm start or npm run start:dev
+4. open swagger and test: http://localhost:3000/api 
