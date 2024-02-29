@@ -9,6 +9,7 @@ import { Schedule, ScheduleSchema } from './model/schedule.model';
   imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema },
                                        { name: Schedule.name, schema: ScheduleSchema }])],
   providers: [UserService],
-  controllers: [UserController]
+  controllers: [UserController],
+  exports: [UserService]
 })
 export class UserModule {}

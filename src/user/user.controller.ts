@@ -16,15 +16,4 @@ export class UserController {
   async register(@Body() dto: CreateUserDto){
     return await this.userService.createUser(dto)
   }
-
-  @Patch('book-slot')
-  @ApiBody({ type: BookSlotDto })
-  async bookSlot(@Body() dto: BookSlotDto){
-    return await this.userService.bookSlot(dto)
-  }
-
-  @Get('get-available-slots')
-  async getAvailableSlots(@Query() dto: GetSlotsDto){
-    return await this.userService.getAvailableTimeIntervals(dto.userId, dto.date)
-  }
 }
