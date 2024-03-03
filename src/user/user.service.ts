@@ -1,26 +1,29 @@
-import { BadRequestException, ConflictException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User, UserDocument } from './model/user.model';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { TimeInterval } from 'src/constants';
-import { BookSlotDto } from './dto/book-slot.dto';
-import { pbkdf2Sync } from 'node:crypto'
-import { Schedule, ScheduleDocument } from './model/schedule.model';
+import { Model } from 'mongoose';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { RegisterDto } from 'src/auth/dto/register.dto';
 
 @Injectable()
 export class UserService {
 
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
-              @InjectModel(Schedule.name) private scheduleModel: Model<ScheduleDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async createUser(dto: CreateUserDto) {
-    const user = await this.userModel.findOne({email: dto.email})
-    if (user)
-      throw new BadRequestException(`User email ${dto.email} is already exists`)
-    
-    const passHash = pbkdf2Sync(dto.password, 'salto', 1000, 25, `sha512`).toString(`hex`)
-    const newUser = new this.userModel({...dto, password: passHash});
-    return await newUser.save()
+  async create(dto: RegisterDto): Promise<User> {
+    const newUser = new this.userModel(dto)
+    return newUser.save();
+  }
+
+  async findUserByEmail(email: string): Promise<User> {
+    return this.userModel.findOne({ email: email }).exec();
+  }
+
+  async findById(userId: string) {
+    return this.userModel.findById(userId).exec();
+  }
+
+  async updateOne(userId: string, data: UpdateUserDto) {
+    await this.userModel.updateOne({ _id: userId }, { $set: data }).exec();
   }
 }
