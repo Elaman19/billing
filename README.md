@@ -1,8 +1,8 @@
 ## Requirements
 
-mongoDB
-redis
-node.js
+MongoDB\
+Redis\
+Node.js
 
 ## Installation
 
