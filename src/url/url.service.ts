@@ -9,9 +9,14 @@ export class UrlService {
   constructor(@InjectModel(Url.name) private urlModel: Model<UrlDocument>) {}
 
   async shorten(dto: CreateUrlDto): Promise<string> {
+    const origin = `${process.env.BASE_URL}:${process.env.PORT}`
+    const url = await this.urlModel.findOne({ url: dto.url })
+    if (url?.code) 
+      return `${origin}/${url.code}`
+
     dto.code = this.generateHash()
     const newUrl = await this.create(dto)
-    return `${process.env.BASE_URL}:${process.env.PORT}/${newUrl.code}`
+    return `${origin}/${newUrl.code}`
   }
 
   async create(dto: CreateUrlDto): Promise<Url> {
@@ -19,16 +24,12 @@ export class UrlService {
     return await newUrl.save()
   }
 
-  async findByLongUrl(longUrl: string): Promise<Url> {
-    return await this.urlModel.findOne({ longUrl })
+  async getAllUrls(){
+    return await this.urlModel.find({})
   }
 
-  async findByCode(code: string): Promise<Url> {
-    return await this.urlModel.findOne({ code })
-  }
-
-  async getLongUrl(code: string){
-    const data = await this.findByCode(code)
+  async findByCode(code: string): Promise<string> {
+    const data = await this.urlModel.findOne({ code })
     if (!data)
       throw new BadRequestException('incorrect code')
 

@@ -4,7 +4,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({versionKey: false})
 export class User {
   @Prop({required: true, type: String})
   name: string
@@ -15,9 +15,6 @@ export class User {
 
   @Prop({ required: true, trim: true, type: String })
   password: string
-
-  @Prop({ type: String })
-  hashdRt: string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

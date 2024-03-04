@@ -4,7 +4,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type UrlDocument = HydratedDocument<Url>;
 
-@Schema()
+@Schema({versionKey: false})
 export class Url {
   @Prop({required: true, trim: true, type: String})
   @IsNotEmpty()
