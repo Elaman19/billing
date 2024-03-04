@@ -16,6 +16,6 @@ $ npm install
 $ npm run start
 ```
 
-## Documentation
+## Swagger Documentation 
 
 http://localhost:3000/api
