@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsEmail } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
@@ -10,7 +9,6 @@ export class User {
   name: string
 
   @Prop({required: true, trim: true, type: String})
-  @IsEmail()
   email: string
 
   @Prop({ required: true, trim: true, type: String })

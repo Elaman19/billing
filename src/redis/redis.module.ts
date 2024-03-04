@@ -12,7 +12,6 @@ import { RedisClientOptions } from 'redis';
       url: process.env.REDIS_STORE
     })
   ],
-  controllers: [],
   providers: [RedisService],
   exports: [RedisService],
 })
