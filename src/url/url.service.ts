@@ -3,10 +3,12 @@ import { Url, UrlDocument } from './model/url.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUrlDto } from './dto/create-url.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class UrlService {
-  constructor(@InjectModel(Url.name) private urlModel: Model<UrlDocument>) {}
+  constructor(@InjectModel(Url.name) private urlModel: Model<UrlDocument>,
+              private redisService: RedisService) {}
 
   async shorten(dto: CreateUrlDto): Promise<string> {
     const origin = `${process.env.BASE_URL}:${process.env.PORT}`
@@ -29,10 +31,15 @@ export class UrlService {
   }
 
   async findByCode(code: string): Promise<string> {
+    const url = await this.redisService.get(code)
+    if (url)
+      return url
+
     const data = await this.urlModel.findOne({ code })
     if (!data)
       throw new BadRequestException('incorrect code')
 
+    this.redisService.set(code, data.url)
     return data.url
   }
 

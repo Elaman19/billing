@@ -16,14 +16,10 @@ export class UserService {
   }
 
   async findUserByEmail(email: string): Promise<User> {
-    return this.userModel.findOne({ email: email }).exec();
+    return this.userModel.findOne({ email }).exec();
   }
 
-  async findById(userId: string) {
-    return this.userModel.findById(userId).exec();
-  }
-
-  async updateOne(userId: string, data: UpdateUserDto) {
-    await this.userModel.updateOne({ _id: userId }, { $set: data }).exec();
+  async updateOne(_id: string, data: UpdateUserDto) {
+    await this.userModel.updateOne({ _id }, { $set: data }).exec();
   }
 }

@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { Response } from 'express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 
 @Controller()
 @ApiTags('Url')
@@ -20,7 +20,7 @@ export class UrlController {
   }
 
   @Get(':code')
-  @ApiOperation({summary: "call short url"})
+  @ApiOperation({summary: "redirect short url to long url"})
   async redirect(@Param('code') code: string, @Res() res: Response){
     const url = await this.urlService.findByCode(code)
     return res.redirect(url)
